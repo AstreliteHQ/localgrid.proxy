@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Fired by localgrid.dev's release-please.yml (notify-proxy job) once a
+  # new @astrelitehq/localgrid version is published, via repository_dispatch
+  # over the GitHub API (a plain push/release trigger can't reach across
+  # repos). client_payload.tag_name is informational only, it's not pinned
+  # into the install below: `npm install` always pulls whatever version
+  # satisfies package.json's range, which is what "the latest release" means
+  # here.
+  repository_dispatch:
+    types: [localgrid-release]
+  # Manual re-run, e.g. after bumping the @astrelitehq/localgrid version
+  # range in package.json or editing this workflow.
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '20'
+          # No npm cache here: there's no committed package-lock.json yet
+          # (see .gitignore), so there's nothing for setup-node to key the
+          # cache on. Switch this back on once a lockfile is committed.
+
+      - name: Install dependencies
+        # npm ci needs a committed lockfile, which this repo doesn't have
+        # yet (see .gitignore). Switch back to `npm ci` once one exists.
+        run: npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PACKAGES_READ_TOKEN }}
+
+      - name: Build
+        # Builds @astrelitehq/localgrid's own source (installed into
+        # node_modules) with its base path set to this repo's github.io
+        # subpath, then copies the result to ./dist. See the "build" script
+        # in package.json.
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

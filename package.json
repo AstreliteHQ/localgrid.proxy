@@ -1,0 +1,23 @@
+{
+  "name": "localgrid-proxy",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "GitHub Pages (github.io) mirror of localgrid.dev, built from the published @astrelitehq/localgrid npm package at its own base path.",
+  "scripts": {
+    "build": "VITE_BASE_PATH=/localgrid.proxy/ npm run build --prefix node_modules/@astrelitehq/localgrid && rm -rf dist && cp -r node_modules/@astrelitehq/localgrid/dist dist",
+    "dev": "npm run dev --prefix node_modules/@astrelitehq/localgrid"
+  },
+  "dependencies": {
+    "@astrelitehq/localgrid": "^0.2.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.13.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0",
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}

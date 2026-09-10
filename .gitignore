@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Not committed yet: @astrelitehq/localgrid is a private GitHub Packages
+# dependency, and this sandbox has no credentials to resolve it, so no
+# lockfile can be generated here. Once someone with read:packages access
+# runs `npm install` locally, commit the resulting package-lock.json and
+# switch pages.yml from `npm install` to `npm ci`.
+package-lock.json
