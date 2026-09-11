@@ -10,12 +10,21 @@ on:
   # here.
   repository_dispatch:
     types: [localgrid-release]
+  # Rebuild whenever main changes (this repo's own site code, not just the
+  # @astrelitehq/localgrid dependency).
+  push:
+    branches: [main]
   # Manual re-run, e.g. after bumping the @astrelitehq/localgrid version
   # range in package.json or editing this workflow.
   workflow_dispatch: {}
 
 permissions:
   contents: read
+  # Lets the default GITHUB_TOKEN read @astrelitehq/localgrid below. Only
+  # works because the localgrid package grants this repo Actions read
+  # access under its own "Manage Actions access" settings; without that
+  # grant this falls back to needing a PAT (see NODE_AUTH_TOKEN below).
+  packages: read
   pages: write
   id-token: write
 
@@ -41,7 +50,11 @@ jobs:
         # yet (see .gitignore). Switch back to `npm ci` once one exists.
         run: npm install
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.PACKAGES_READ_TOKEN }}
+          # The default token, not a PAT: astrelitehq/localgrid has granted
+          # this repo Actions read access to the package (see the
+          # `packages: read` permission above). See .npmrc for the registry
+          # config this authenticates against.
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
         # Builds @astrelitehq/localgrid's own source (installed into
