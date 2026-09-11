@@ -10,12 +10,16 @@ on:
   # here.
   repository_dispatch:
     types: [localgrid-release]
+  # Rebuild on this repo's own commits, not just localgrid releases.
+  push:
+    branches: [main]
   # Manual re-run, e.g. after bumping the @astrelitehq/localgrid version
   # range in package.json or editing this workflow.
   workflow_dispatch: {}
 
 permissions:
   contents: read
+  packages: read # lets GITHUB_TOKEN read @astrelitehq/localgrid below
   pages: write
   id-token: write
 
@@ -41,7 +45,7 @@ jobs:
         # yet (see .gitignore). Switch back to `npm ci` once one exists.
         run: npm install
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.PACKAGES_READ_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # granted via the package's Actions access settings
 
       - name: Build
         # Builds @astrelitehq/localgrid's own source (installed into
