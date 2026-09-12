@@ -14,17 +14,6 @@ package version. Also rebuilds on push to `main`, or manually via
 `workflow_dispatch`. `ci.yml` builds (not deploys) on every push, any
 branch, to catch a broken build before it reaches `main`.
 
-## One-time setup
-
-- GitHub Pages source: this repo's Settings → Pages → "GitHub Actions".
-- `PACKAGES_READ_TOKEN` secret (here): a PAT with `read:packages` on
-  AstreliteHQ, so `npm install` can pull the package.
-- `PROXY_DISPATCH_TOKEN` secret (in localgrid.dev): a PAT with `repo`
-  scope (or Contents: Read + Actions: Write here), used by its
-  `notify-proxy` job to trigger this repo's deploy.
-
-One fine-grained PAT scoped to both repos can back both secrets.
-
 ## Extra devDependencies
 
 `vitest`, Testing Library, and `@types/spark-md5` are devDependencies here
