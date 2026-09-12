@@ -1,63 +1,40 @@
 # localgrid.proxy
 
-A GitHub Pages (`github.io`) mirror of [localgrid.dev](https://github.com/AstreliteHQ/localgrid.dev).
+Mirrors [localgrid.dev](https://github.com/AstreliteHQ/localgrid.dev) to
+`astrelitehq.github.io/localgrid.proxy/`, alongside its custom-domain
+deployment. No app source lives here: it installs the
+[`@astrelitehq/localgrid`](https://github.com/AstreliteHQ/localgrid.dev/pkgs/npm/localgrid)
+npm package and builds *that* package's source with a different Vite base
+path baked in.
 
-localgrid.dev deploys behind its own custom domain. This repo exists so the
-app is also reachable at `astrelitehq.github.io/localgrid.proxy/`, without
-touching that custom-domain deployment. It doesn't contain any app source of
-its own: it installs the [`@astrelitehq/localgrid`](https://github.com/AstreliteHQ/localgrid.dev/pkgs/npm/localgrid)
-npm package (published to GitHub Packages on every localgrid.dev release) and
-builds *that* package's own source, with the Vite base path overridden to
-`/localgrid.proxy/` instead of localgrid.dev's default `/`. The base path is
-baked into the built assets at build time, so this is the only difference
-between the two deployments.
+## Staying up to date
 
-## How it stays up to date
+localgrid.dev's release workflow dispatches a rebuild here on every new
+package version. Also rebuilds on push to `main`, or manually via
+`workflow_dispatch`. `ci.yml` builds (not deploys) on every push, any
+branch, to catch a broken build before it reaches `main`.
 
-localgrid.dev's release workflow sends a `repository_dispatch` event to this
-repo after it publishes a new `@astrelitehq/localgrid` version, which
-triggers [`pages.yml`](.github/workflows/pages.yml) here to reinstall
-(picking up the new version) and redeploy. It can also be run manually from
-the Actions tab (`workflow_dispatch`).
+## Extra devDependencies
 
-## One-time manual setup
-
-A few things can't be done from code and need to happen once in each repo's
-settings:
-
-- **GitHub Pages source**: in this repo's Settings → Pages, set the source
-  to "GitHub Actions".
-- **`PACKAGES_READ_TOKEN` secret** (in this repo): a personal access token
-  with `read:packages` scope (classic) or Packages: Read (fine-grained) on
-  the AstreliteHQ org, so `npm install` can pull `@astrelitehq/localgrid`
-  from GitHub Packages. Add it under Settings → Secrets and variables →
-  Actions.
-- **`PROXY_DISPATCH_TOKEN` secret** (in localgrid.dev, not here): a PAT with
-  `repo` scope (classic) or Contents: Read + Actions: Write (fine-grained)
-  on this repo, so localgrid.dev's release workflow can dispatch the deploy
-  above. See the `notify-proxy` job in localgrid.dev's
-  `.github/workflows/release-please.yml`.
-
-A single fine-grained PAT scoped to both repos (Packages: Read on
-localgrid.dev, Contents: Read + Actions: Write on localgrid.proxy) can back
-both secrets if you'd rather manage one token than two.
+`vitest`, Testing Library, and `@types/spark-md5` are devDependencies here
+even though this repo has no tests. `@astrelitehq/localgrid`'s own build
+(`tsc -b`) type-checks its whole source tree, tests included, but the
+published package doesn't ship its devDependencies. Listing the same ones
+here lets npm's hoisted `node_modules` satisfy that type-check. Keep their
+versions in sync with localgrid.dev's own `package.json`.
 
 ## Lockfile
 
-`package-lock.json` isn't committed yet (see `.gitignore`): generating one
-requires resolving `@astrelitehq/localgrid` from GitHub Packages, which
-needs the same `read:packages`-scoped credentials as above. Once you have
-those locally (`export NODE_AUTH_TOKEN=...` with a PAT that has
-`read:packages`), run `npm install`, commit the generated
-`package-lock.json`, remove it from `.gitignore`, and switch
-[`pages.yml`](.github/workflows/pages.yml) from `npm install` back to
-`npm ci` for reproducible installs.
+Not committed yet (see `.gitignore`); generating one needs
+`read:packages` credentials to resolve `@astrelitehq/localgrid`. Once you
+have one, run `npm install`, commit `package-lock.json`, and switch
+`pages.yml` to `npm ci`.
 
 ## Local development
 
 ```bash
 export NODE_AUTH_TOKEN=<a PAT with read:packages on AstreliteHQ>
 npm install
-npm run dev      # dev server, base path defaults to /
-npm run build    # production build at /localgrid.proxy/, output in ./dist
+npm run dev      # base path defaults to /
+npm run build    # production build at /localgrid.proxy/
 ```
