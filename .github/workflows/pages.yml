@@ -1,20 +1,14 @@
 name: Deploy to GitHub Pages
 
 on:
-  # Fired by localgrid.dev's release-please.yml (notify-proxy job) once a
-  # new @astrelitehq/localgrid version is published, via repository_dispatch
-  # over the GitHub API (a plain push/release trigger can't reach across
-  # repos). client_payload.tag_name is informational only, it's not pinned
-  # into the install below: `npm install` always pulls whatever version
-  # satisfies package.json's range, which is what "the latest release" means
-  # here.
+  # Fired by localgrid.dev's release-please.yml after a new package version
+  # is published (repository_dispatch, since a cross-repo trigger can't
+  # work any other way).
   repository_dispatch:
     types: [localgrid-release]
   # Rebuild on this repo's own commits, not just localgrid releases.
   push:
     branches: [main]
-  # Manual re-run, e.g. after bumping the @astrelitehq/localgrid version
-  # range in package.json or editing this workflow.
   workflow_dispatch: {}
 
 permissions:
@@ -36,22 +30,15 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24' # matches @types/node's ^24.x range below
-          # No npm cache here: there's no committed package-lock.json yet
-          # (see .gitignore), so there's nothing for setup-node to key the
-          # cache on. Switch this back on once a lockfile is committed.
+          # No npm cache: no committed package-lock.json yet (see .gitignore).
 
       - name: Install dependencies
-        # npm ci needs a committed lockfile, which this repo doesn't have
-        # yet (see .gitignore). Switch back to `npm ci` once one exists.
-        run: npm install
+        run: npm install # switch to `npm ci` once a lockfile is committed
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # granted via the package's Actions access settings
 
       - name: Build
-        # Builds @astrelitehq/localgrid's own source (installed into
-        # node_modules) with its base path set to this repo's github.io
-        # subpath, then copies the result to ./dist. See the "build" script
-        # in package.json.
+        # Builds @astrelitehq/localgrid's source with this repo's base path.
         run: npm run build
 
       - name: Upload build artifact
