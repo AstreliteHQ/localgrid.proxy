@@ -11,7 +11,8 @@ path baked in.
 
 localgrid.dev's release workflow dispatches a rebuild here on every new
 package version. Also rebuilds on push to `main`, or manually via
-`workflow_dispatch`.
+`workflow_dispatch`. `ci.yml` builds (not deploys) on every push, any
+branch, to catch a broken build before it reaches `main`.
 
 ## One-time setup
 
