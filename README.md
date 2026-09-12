@@ -25,7 +25,7 @@ versions in sync with localgrid.dev's own `package.json`.
 
 ## Lockfile
 
-Not committed yet (see `.gitignore`) — generating one needs
+Not committed yet (see `.gitignore`); generating one needs
 `read:packages` credentials to resolve `@astrelitehq/localgrid`. Once you
 have one, run `npm install`, commit `package-lock.json`, and switch
 `pages.yml` to `npm ci`.
