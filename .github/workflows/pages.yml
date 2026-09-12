@@ -35,19 +35,10 @@ jobs:
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '20'
+          node-version: '24' # matches @types/node's ^24.x range below
           # No npm cache here: there's no committed package-lock.json yet
           # (see .gitignore), so there's nothing for setup-node to key the
           # cache on. Switch this back on once a lockfile is committed.
-
-      - name: Upgrade npm
-        # Node 20's bundled npm (10.x) crashes ("Cannot read properties of
-        # null (reading 'edgesOut')") in its arborist resolver while
-        # resolving vitest's optional peer dependencies (@vitest/browser-*,
-        # msw, etc.) below. Fixed in npm 12. Pinned rather than `npm@latest`
-        # so a future npm release can't reintroduce a different resolver
-        # bug here silently.
-        run: npm install -g npm@12.0.2
 
       - name: Install dependencies
         # npm ci needs a committed lockfile, which this repo doesn't have

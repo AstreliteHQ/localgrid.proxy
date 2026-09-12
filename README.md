@@ -100,8 +100,10 @@ those locally (`export NODE_AUTH_TOKEN=...` with a PAT that has
 
 ```bash
 export NODE_AUTH_TOKEN=<a PAT with read:packages on AstreliteHQ>
-npm install      # needs npm >= 12; older npm can crash resolving vitest's
-                 # optional peer deps, see the "Upgrade npm" step in pages.yml
+npm install      # Node 24 recommended (matches @types/node below and CI);
+                 # npm 10.9.7 (Node 22's bundled version at the time of
+                 # writing) crashes resolving vitest's optional peer deps,
+                 # npm 11+ (bundled with Node 24) doesn't
 npm run dev      # dev server, base path defaults to /
 npm run build    # production build at /localgrid.proxy/, output in ./dist
 ```
