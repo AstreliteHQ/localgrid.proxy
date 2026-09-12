@@ -42,6 +42,52 @@ A single fine-grained PAT scoped to both repos (Packages: Read on
 localgrid.dev, Contents: Read + Actions: Write on localgrid.proxy) can back
 both secrets if you'd rather manage one token than two.
 
+## Why `vitest`, Testing Library, and `@types/spark-md5` are devDependencies here
+
+This repo has no tests of its own, but `package.json` still lists `vitest`,
+`@testing-library/dom`, `@testing-library/react`,
+`@testing-library/user-event`, `@testing-library/jest-dom`, and
+`@types/spark-md5` as devDependencies. That's a workaround, not an
+accident.
+
+`@astrelitehq/localgrid`'s own `build` script is `tsc -b && vite build`,
+and its `tsconfig.app.json` does `"include": ["src"]` with no exclusion for
+`*.test.ts(x)` files, so `tsc -b` type-checks the whole `src` tree —
+including its test files and `spark-md5`-typed source — on every build.
+But the npm package only ships its own `dependencies`, not the
+`devDependencies` those files need type declarations for (`vitest`,
+`@testing-library/*` for the tests; `@types/spark-md5` for
+`HashGeneratorWidget.tsx` itself, which imports the untyped `spark-md5`
+package directly). Since this repo builds `@astrelitehq/localgrid` by
+running its `build` script straight out of `node_modules` (see above), that
+build fails here with `TS2307: Cannot find module 'vitest'` and similar
+errors unless those packages are available too. (`@testing-library/dom` is
+only a *peer* dependency of `@testing-library/react`/`user-event`, normally
+auto-installed by npm — it's listed explicitly here because installing
+with plain `npm install` currently hits an npm arborist crash resolving
+`vitest`'s optional peer graph, worked around below with
+`--legacy-peer-deps`, which skips that auto-install.)
+
+Because npm installs into one flat, hoisted `node_modules`, adding the same
+packages as devDependencies *here* puts them where `tsc -b` running inside
+`node_modules/@astrelitehq/localgrid` can still resolve them, without
+touching localgrid.dev. Their versions should track the `devDependencies`
+versions in [localgrid.dev's `package.json`](https://github.com/AstreliteHQ/localgrid.dev/blob/main/package.json)
+for whichever files a given `@astrelitehq/localgrid` release ships; bump
+them here if a new release needs something this list doesn't cover yet (a
+build failing with another `TS2307`/`TS7016` for a `devDependency`-only
+package is the signal).
+
+The real fix is upstream, in localgrid.dev: excluding test files from
+`tsconfig.app.json`'s production project (or otherwise keeping them out of
+`tsc -b`), and adding `@types/spark-md5` to `dependencies` instead of
+`devDependencies` since `spark-md5` itself is a runtime dependency, so a
+consumer installing the published package never needs the test toolchain
+just to build it. Once that lands, this section and the devDependencies
+above can go (except `@types/spark-md5`, or whatever replaces it, which
+would then belong under `dependencies` in localgrid.dev and get pulled in
+transitively instead).
+
 ## Lockfile
 
 `package-lock.json` isn't committed yet (see `.gitignore`): generating one
@@ -57,7 +103,7 @@ those locally (`export NODE_AUTH_TOKEN=...` with a PAT that has
 
 ```bash
 export NODE_AUTH_TOKEN=<a PAT with read:packages on AstreliteHQ>
-npm install
+npm install --legacy-peer-deps  # see "Why vitest and Testing Library are devDependencies here"
 npm run dev      # dev server, base path defaults to /
 npm run build    # production build at /localgrid.proxy/, output in ./dist
 ```
