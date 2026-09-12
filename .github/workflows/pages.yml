@@ -40,17 +40,19 @@ jobs:
           # (see .gitignore), so there's nothing for setup-node to key the
           # cache on. Switch this back on once a lockfile is committed.
 
+      - name: Upgrade npm
+        # Node 20's bundled npm (10.x) crashes ("Cannot read properties of
+        # null (reading 'edgesOut')") in its arborist resolver while
+        # resolving vitest's optional peer dependencies (@vitest/browser-*,
+        # msw, etc.) below. Fixed in npm 12. Pinned rather than `npm@latest`
+        # so a future npm release can't reintroduce a different resolver
+        # bug here silently.
+        run: npm install -g npm@12.0.2
+
       - name: Install dependencies
         # npm ci needs a committed lockfile, which this repo doesn't have
         # yet (see .gitignore). Switch back to `npm ci` once one exists.
-        #
-        # --legacy-peer-deps works around an npm arborist crash
-        # ("Cannot read properties of null (reading 'edgesOut')") hit while
-        # resolving vitest's optional peer dependencies (@vitest/browser-*,
-        # msw, etc.) with npm's default (npm >= 7) peer-dependency
-        # resolver. See the "Why vitest and Testing Library are
-        # devDependencies here" section in README.md.
-        run: npm install --legacy-peer-deps
+        run: npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # granted via the package's Actions access settings
 
