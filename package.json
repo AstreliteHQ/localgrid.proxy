@@ -9,7 +9,7 @@
     "dev": "npm run dev --prefix node_modules/@astrelitehq/localgrid"
   },
   "dependencies": {
-    "@astrelitehq/localgrid": "^0.2.1"
+    "@astrelitehq/localgrid": "*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
