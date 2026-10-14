@@ -18,16 +18,11 @@ branch, to catch a broken build before it reaches `main`.
 
 `@astrelitehq/localgrid`'s own build (`tsc -b`) type-checks its whole
 source tree, tests included, but npm never installs a dependency's
-devDependencies. Two mechanisms cover that:
-
-- **`postinstall`**: when the installed package ships an
-  `npm-shrinkwrap.json` (localgrid.dev's publish workflow generates one),
-  runs `npm ci` inside the package folder. This installs its devDependencies
-  at the exact versions localgrid.dev builds with.
-- **This repo's devDependencies**: a hand-kept copy of the build-relevant
-  ones, for package versions published before the shrinkwrap existed.
-  Since `@astrelitehq/localgrid` is `*`, this list can be removed once the
-  latest published version ships a shrinkwrap.
+devDependencies. So `postinstall` runs `npm ci` inside
+`node_modules/@astrelitehq/localgrid`, using the `npm-shrinkwrap.json` that
+localgrid.dev publishes with every release. The build then uses the exact
+devDependency versions localgrid.dev builds with, and this repo needs no
+devDependencies of its own.
 
 ## Lockfile
 

@@ -29,7 +29,7 @@ jobs:
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '24' # matches @types/node's ^24.x range below
+          node-version: '24' # matches localgrid.dev's @types/node ^24.x range
           # No npm cache: no committed package-lock.json yet (see .gitignore).
 
       - name: Install dependencies
