@@ -5,6 +5,7 @@
   "type": "module",
   "description": "GitHub Pages (github.io) mirror of localgrid.dev, built from the published @astrelitehq/localgrid npm package at its own base path.",
   "scripts": {
+    "postinstall": "cd node_modules/@astrelitehq/localgrid && if [ -f npm-shrinkwrap.json ]; then npm ci --include=dev --ignore-scripts; fi",
     "build": "VITE_BASE_PATH=/localgrid.proxy/ npm run build --prefix node_modules/@astrelitehq/localgrid && rm -rf dist && cp -r node_modules/@astrelitehq/localgrid/dist dist",
     "dev": "npm run dev --prefix node_modules/@astrelitehq/localgrid"
   },
@@ -17,6 +18,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.3",
     "@types/node": "^24.13.3",
+    "@types/nunjucks": "^3.2.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/spark-md5": "^3.0.5",
