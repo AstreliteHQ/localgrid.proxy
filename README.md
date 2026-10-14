@@ -14,14 +14,15 @@ package version. Also rebuilds on push to `main`, or manually via
 `workflow_dispatch`. `ci.yml` builds (not deploys) on every push, any
 branch, to catch a broken build before it reaches `main`.
 
-## Extra devDependencies
+## Build dependencies
 
-`vitest`, Testing Library, and `@types/spark-md5` are devDependencies here
-even though this repo has no tests. `@astrelitehq/localgrid`'s own build
-(`tsc -b`) type-checks its whole source tree, tests included, but the
-published package doesn't ship its devDependencies. Listing the same ones
-here lets npm's hoisted `node_modules` satisfy that type-check. Keep their
-versions in sync with localgrid.dev's own `package.json`.
+`@astrelitehq/localgrid`'s own build (`tsc -b`) type-checks its whole
+source tree, tests included, but npm never installs a dependency's
+devDependencies. So `postinstall` runs `npm ci` inside
+`node_modules/@astrelitehq/localgrid`, using the `npm-shrinkwrap.json` that
+localgrid.dev publishes with every release. The build then uses the exact
+devDependency versions localgrid.dev builds with, and this repo needs no
+devDependencies of its own.
 
 ## Lockfile
 
